@@ -146,6 +146,93 @@
     50% { box-shadow: 0 0 30px rgba(118,185,0,0.35), 0 0 60px rgba(118,185,0,0.15); }
   }
 
+  /* === MONTHLY OVERVIEW === */
+  .monthly-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .monthly-toggles {
+    display: flex;
+    gap: 4px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 4px;
+    border-radius: 8px;
+  }
+  .monthly-toggle {
+    padding: 8px 14px;
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 6px;
+    font-family: inherit;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .monthly-toggle:hover {
+    color: #f5f1e8;
+  }
+  .monthly-toggle.active {
+    background: rgba(118,185,0,0.12);
+    color: #76b900;
+    border: 1px solid rgba(118,185,0,0.25);
+  }
+  .monthly-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .monthly-stat {
+    padding: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+  }
+  .monthly-stat.best {
+    background: linear-gradient(135deg, rgba(118,185,0,0.08) 0%, rgba(118,185,0,0.02) 100%);
+    border-color: rgba(118,185,0,0.25);
+  }
+  .monthly-stat-label {
+    font-size: 10px;
+    color: rgba(118,185,0,0.7);
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .monthly-stat.best .monthly-stat-label {
+    color: #c4f550;
+  }
+  .monthly-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f5f1e8;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .monthly-stat.best .monthly-stat-value {
+    color: #76b900;
+  }
+  .monthly-stat-sub {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+  @media (max-width: 600px) {
+    .monthly-stats { grid-template-columns: 1fr; gap: 8px; }
+    .monthly-stat { padding: 10px 12px; }
+    .monthly-stat-value { font-size: 18px; }
+    .monthly-toggle { padding: 6px 10px; font-size: 10px; }
+  }
+
   /* === LOGIN SCREEN === */
   #loginScreen {
     position: fixed;
@@ -180,7 +267,7 @@
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 18px rgba(118,185,0,0.5));
     animation: brand-pulse 4s ease-in-out infinite;
-    margin-bottom: 16px;
+    margin-bottom: 56px;
   }
   .login-subtitle {
     font-size: 12px;
@@ -1624,7 +1711,6 @@
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">552</div>
-    <div class="login-subtitle">FIKTIVNÍ ÚČETNICTVÍ</div>
     <button class="login-btn" id="loginBtn">
       <svg viewBox="0 0 24 24" fill="none">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -1780,6 +1866,39 @@
         <h3 class="chart-title">Naskladnění v čase</h3>
         <div class="chart-canvas-wrap" id="chart4Wrap"><canvas id="chart4"></canvas></div>
       </div>
+    </div>
+
+    <!-- Měsíční přehled prodejů -->
+    <div class="card" style="margin-top: 16px;">
+      <div class="monthly-header">
+        <div>
+          <h3 class="chart-title" style="margin: 0 0 4px 0;">Prodeje po měsících</h3>
+          <p style="font-size: 12px; color: #6b7280; margin: 0;">Který měsíc byl nejúspěšnější</p>
+        </div>
+        <div class="monthly-toggles" id="monthlyToggles">
+          <button class="monthly-toggle active" data-metric="amount">ČÁSTKY</button>
+          <button class="monthly-toggle" data-metric="count">POČET</button>
+          <button class="monthly-toggle" data-metric="quantity">KUSY</button>
+        </div>
+      </div>
+      <div class="monthly-stats" id="monthlyStats">
+        <div class="monthly-stat best">
+          <div class="monthly-stat-label">🏆 NEJLEPŠÍ MĚSÍC</div>
+          <div class="monthly-stat-value" id="monthlyBest">—</div>
+          <div class="monthly-stat-sub" id="monthlyBestSub">—</div>
+        </div>
+        <div class="monthly-stat">
+          <div class="monthly-stat-label">PRŮMĚR / MĚSÍC</div>
+          <div class="monthly-stat-value" id="monthlyAvg">—</div>
+          <div class="monthly-stat-sub" id="monthlyAvgSub">—</div>
+        </div>
+        <div class="monthly-stat">
+          <div class="monthly-stat-label">CELKEM</div>
+          <div class="monthly-stat-value" id="monthlyTotal">—</div>
+          <div class="monthly-stat-sub" id="monthlyTotalSub">—</div>
+        </div>
+      </div>
+      <div class="chart-canvas-wrap" style="height: 320px;" id="monthlyChartWrap"><canvas id="monthlyChart"></canvas></div>
     </div>
 
     <!-- Všichni plátci -->
@@ -2620,7 +2739,245 @@ function renderCharts() {
   } else {
     $('chart4Wrap').innerHTML = '<div class="empty-chart">Žádná data k zobrazení</div>';
   }
+  
+  // Render the monthly overview chart
+  renderMonthlyChart();
 }
+
+// =============== MONTHLY OVERVIEW CHART ===============
+let monthlyMetric = 'amount'; // 'amount', 'count', 'quantity'
+
+const MONTH_NAMES_CZ = ['Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čer', 'Čvc', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'];
+
+function renderMonthlyChart() {
+  const tickColor = '#555';
+  const gridColor = 'rgba(255,255,255,0.05)';
+  const tooltipBg = '#050505';
+  
+  // Aggregate transactions by year-month
+  // Only count PAID transactions (skutečné prodeje) + zaplacené bývalé dluhy
+  const paidTransactions = transactions.filter(t => t.status === 'paid');
+  
+  if (paidTransactions.length === 0) {
+    $('monthlyChartWrap').innerHTML = '<div class="empty-chart">Zatím žádné prodeje</div>';
+    $('monthlyBest').textContent = '—';
+    $('monthlyBestSub').textContent = '—';
+    $('monthlyAvg').textContent = '—';
+    $('monthlyAvgSub').textContent = '—';
+    $('monthlyTotal').textContent = '—';
+    $('monthlyTotalSub').textContent = '—';
+    return;
+  }
+  
+  const byMonth = {};
+  paidTransactions.forEach(t => {
+    if (!t.date) return;
+    const d = new Date(t.date);
+    if (isNaN(d.getTime())) return;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (!byMonth[key]) {
+      byMonth[key] = { 
+        key: key,
+        year: d.getFullYear(),
+        month: d.getMonth(),
+        amount: 0, 
+        count: 0, 
+        quantity: 0 
+      };
+    }
+    byMonth[key].amount += t.amount;
+    byMonth[key].count += 1;
+    byMonth[key].quantity += (t.quantity || 0);
+  });
+  
+  // Sort by date
+  let monthsData = Object.values(byMonth).sort((a, b) => a.key.localeCompare(b.key));
+  
+  // Fill in missing months in between (so the chart shows gaps)
+  if (monthsData.length > 1) {
+    const filled = [];
+    const first = monthsData[0];
+    const last = monthsData[monthsData.length - 1];
+    let cur = new Date(first.year, first.month, 1);
+    const end = new Date(last.year, last.month, 1);
+    while (cur <= end) {
+      const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}`;
+      const existing = monthsData.find(m => m.key === key);
+      filled.push(existing || {
+        key, year: cur.getFullYear(), month: cur.getMonth(),
+        amount: 0, count: 0, quantity: 0
+      });
+      cur.setMonth(cur.getMonth() + 1);
+    }
+    monthsData = filled;
+  }
+  
+  // Limit to last 12 months max (so it doesn't get too wide)
+  if (monthsData.length > 12) {
+    monthsData = monthsData.slice(-12);
+  }
+  
+  // Prepare metric values
+  const metricValues = monthsData.map(m => m[monthlyMetric]);
+  const labels = monthsData.map(m => `${MONTH_NAMES_CZ[m.month]} ${String(m.year).slice(2)}`);
+  
+  // Compute moving average (3-month trend line) - or just average for shorter series
+  let trendValues;
+  if (monthsData.length >= 3) {
+    trendValues = monthsData.map((m, i) => {
+      const start = Math.max(0, i - 1);
+      const end = Math.min(monthsData.length, i + 2);
+      const window = metricValues.slice(start, end);
+      return window.reduce((s, v) => s + v, 0) / window.length;
+    });
+  } else {
+    // Average flat line
+    const avg = metricValues.reduce((s, v) => s + v, 0) / metricValues.length;
+    trendValues = monthsData.map(() => avg);
+  }
+  
+  // Find best month
+  let bestIdx = 0;
+  for (let i = 1; i < metricValues.length; i++) {
+    if (metricValues[i] > metricValues[bestIdx]) bestIdx = i;
+  }
+  const bestMonth = monthsData[bestIdx];
+  const totalSum = metricValues.reduce((s, v) => s + v, 0);
+  const monthsWithData = monthsData.filter(m => m[monthlyMetric] > 0).length || 1;
+  const avgValue = totalSum / monthsWithData;
+  
+  // Format helpers
+  const unit = monthlyMetric === 'amount' ? 'Kč' : (monthlyMetric === 'count' ? 'transakcí' : 'ks');
+  const formatVal = (v) => {
+    if (monthlyMetric === 'amount') return fmt(Math.round(v));
+    return fmt(Math.round(v));
+  };
+  
+  // Update stats cards
+  $('monthlyBest').textContent = `${formatVal(metricValues[bestIdx])} ${unit}`;
+  $('monthlyBestSub').textContent = `${MONTH_NAMES_CZ[bestMonth.month]} ${bestMonth.year}`;
+  $('monthlyAvg').textContent = `${formatVal(avgValue)} ${unit}`;
+  $('monthlyAvgSub').textContent = `${monthsWithData} ${monthsWithData === 1 ? 'měsíc' : (monthsWithData < 5 ? 'měsíce' : 'měsíců')} s daty`;
+  $('monthlyTotal').textContent = `${formatVal(totalSum)} ${unit}`;
+  $('monthlyTotalSub').textContent = `za ${monthsData.length} ${monthsData.length === 1 ? 'měsíc' : (monthsData.length < 5 ? 'měsíce' : 'měsíců')}`;
+  
+  // Destroy old chart
+  if (charts.monthly) {
+    charts.monthly.destroy();
+    charts.monthly = null;
+  }
+  
+  // Recreate canvas if needed
+  let canvas = $('monthlyChart');
+  if (!canvas) {
+    $('monthlyChartWrap').innerHTML = '<canvas id="monthlyChart"></canvas>';
+    canvas = $('monthlyChart');
+  }
+  
+  // Bar colors - highlight best month
+  const barColors = monthsData.map((m, i) => {
+    if (i === bestIdx) return 'rgba(196, 245, 80, 0.85)';  // bright yellow-green for best
+    return 'rgba(118, 185, 0, 0.55)';
+  });
+  const borderColors = monthsData.map((m, i) => {
+    if (i === bestIdx) return '#c4f550';
+    return '#76b900';
+  });
+  
+  charts.monthly = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          type: 'bar',
+          label: monthlyMetric === 'amount' ? 'Částka' : (monthlyMetric === 'count' ? 'Počet transakcí' : 'Počet kusů'),
+          data: metricValues,
+          backgroundColor: barColors,
+          borderColor: borderColors,
+          borderWidth: 1.5,
+          borderRadius: 6,
+          order: 2
+        },
+        {
+          type: 'line',
+          label: 'Trend',
+          data: trendValues,
+          borderColor: 'rgba(248, 113, 113, 0.8)',
+          backgroundColor: 'rgba(248, 113, 113, 0.1)',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#f87171',
+          fill: false,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: '#a89889',
+            font: { size: 11, family: 'Poppins' },
+            usePointStyle: true,
+            pointStyle: 'rect',
+            padding: 12,
+            boxWidth: 12,
+            boxHeight: 12
+          }
+        },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          borderColor: 'rgba(118,185,0,0.3)',
+          borderWidth: 1,
+          titleColor: '#76b900',
+          bodyColor: '#f5f1e8',
+          padding: 12,
+          callbacks: {
+            label: (ctx) => {
+              const v = Math.round(ctx.parsed.y);
+              return `${ctx.dataset.label}: ${fmt(v)} ${unit}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor, drawBorder: false },
+          ticks: { color: tickColor, font: { size: 11, family: 'Poppins' } }
+        },
+        y: {
+          grid: { color: gridColor, drawBorder: false },
+          ticks: { 
+            color: tickColor, 
+            font: { size: 11, family: 'Poppins' },
+            callback: (v) => fmt(Math.round(v))
+          },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+// Wire up monthly toggles
+document.querySelectorAll('.monthly-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.monthly-toggle').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    monthlyMetric = btn.dataset.metric;
+    renderMonthlyChart();
+  });
+});
 
 // =============== FILTERS & SEARCH ===============
 function filterTransactions(items) {
