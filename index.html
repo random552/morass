@@ -4220,6 +4220,7 @@ let firestoreUnsubscribe = null;
 let syncInProgress = false;
 let pendingSyncTimer = null;
 let suppressSync = false; // Suppress sync during data load
+let hasLoadedFromCloud = false; // Track if we've successfully loaded from cloud at least once
 
 function setSyncStatus(status, text) {
   const el = $('syncStatus');
@@ -4369,6 +4370,7 @@ async function loadFromFirestore(userId) {
     
     // Now subscribe to real-time updates
     subscribeToFirestore(userId);
+    hasLoadedFromCloud = true;
     setSyncStatus('synced', 'SYNCED');
     render();
   } catch (err) {
@@ -4419,6 +4421,13 @@ function subscribeToFirestore(userId) {
 async function syncToFirestore() {
   if (!currentUser || !window.firebaseApp || suppressSync) return;
   if (syncInProgress) return;
+  
+  // SAFETY: Don't push empty data on top of cloud data we haven't loaded yet
+  // This prevents accidental data wipe if user clears browser data
+  if (transactions.length === 0 && inventory.length === 0 && !hasLoadedFromCloud) {
+    console.log('[Sync] Skipping empty push - cloud data not loaded yet');
+    return;
+  }
   
   syncInProgress = true;
   setSyncStatus('syncing', 'SYNCING');
@@ -4507,6 +4516,7 @@ whenFirebaseReady(() => {
     } else {
       // User signed out
       currentUser = null;
+      hasLoadedFromCloud = false;
       console.log('[Auth] Signed out');
       
       // Reset UI
