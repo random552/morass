@@ -2104,8 +2104,8 @@ if (migrated) {
 const todayStr = () => new Date().toISOString().split('T')[0];
 const fmt = n => Number(n).toLocaleString('cs-CZ');
 const $ = id => document.getElementById(id);
-const saveTrans = () => localStorage.setItem(STORAGE_KEY_TR, JSON.stringify(transactions));
-const saveInv = () => localStorage.setItem(STORAGE_KEY_INV, JSON.stringify(inventory));
+let saveTrans = () => localStorage.setItem(STORAGE_KEY_TR, JSON.stringify(transactions));
+let saveInv = () => localStorage.setItem(STORAGE_KEY_INV, JSON.stringify(inventory));
 
 // =============== TOAST ===============
 function showToast(msg, type = 'success') {
