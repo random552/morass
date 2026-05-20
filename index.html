@@ -2944,20 +2944,20 @@ function renderCurrentMonthChart() {
   
   // Update label
   $('currentMonthLabel').textContent = `(${MONTHS_FULL_CZ[currentMonth]} ${currentYear})`;
-  $('currentMonthSub').textContent = `Denní prodej kusů — porovnání s ${MONTHS_FULL_CZ[prevMonth].toLowerCase()}em`;
+  $('currentMonthSub').textContent = `Denní prodej kusů (vč. dluhů) — porovnání s ${MONTHS_FULL_CZ[prevMonth].toLowerCase()}em`;
   
-  // Filter PAID transactions for current and previous month
-  // Only paid transactions count as actual sales
+  // Filter all transactions for current and previous month (paid + debt)
+  // Both paid and debt count as sales - debt is just unpaid yet
   // Exclude specified dates (e.g. big imports)
-  const paidTransactions = transactions.filter(t => 
-    t.status === 'paid' && t.quantity > 0 && !isExcludedDate(t.date)
+  const allTransactions = transactions.filter(t => 
+    t.quantity > 0 && !isExcludedDate(t.date)
   );
   
   // Aggregate by day for current month
   const currentMonthData = new Array(daysInMonth).fill(0);
   const prevMonthData = new Array(daysInPrevMonth).fill(0);
   
-  paidTransactions.forEach(t => {
+  allTransactions.forEach(t => {
     if (!t.date) return;
     const d = new Date(t.date);
     if (isNaN(d.getTime())) return;
