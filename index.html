@@ -226,8 +226,12 @@
     margin-top: 4px;
     letter-spacing: 0.05em;
   }
+  @media (max-width: 700px) {
+    #currentMonthStats { grid-template-columns: repeat(2, 1fr) !important; }
+  }
   @media (max-width: 600px) {
     .monthly-stats { grid-template-columns: 1fr; gap: 8px; }
+    #currentMonthStats { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
     .monthly-stat { padding: 10px 12px; }
     .monthly-stat-value { font-size: 18px; }
     .monthly-toggle { padding: 6px 10px; font-size: 10px; }
@@ -1853,19 +1857,44 @@
       </div>
     </div>
 
-    <div class="charts">
-      <div class="card">
-        <h3 class="chart-title">Vývoj transakcí</h3>
-        <div class="chart-canvas-wrap" id="chart1Wrap"><canvas id="chart1"></canvas></div>
-      </div>
+    <div class="charts" style="grid-template-columns: 1fr;">
       <div class="card">
         <h3 class="chart-title">Top 5 podle částky</h3>
         <div class="chart-canvas-wrap" id="chart3Wrap"><canvas id="chart3"></canvas></div>
       </div>
-      <div class="card">
-        <h3 class="chart-title">Naskladnění v čase</h3>
-        <div class="chart-canvas-wrap" id="chart4Wrap"><canvas id="chart4"></canvas></div>
+    </div>
+
+    <!-- Tento měsíc - denní vývoj -->
+    <div class="card" style="margin-top: 16px;">
+      <div class="monthly-header">
+        <div>
+          <h3 class="chart-title" style="margin: 0 0 4px 0;">Tento měsíc <span id="currentMonthLabel" style="color:#76b900;">—</span></h3>
+          <p style="font-size: 12px; color: #6b7280; margin: 0;" id="currentMonthSub">Denní prodej kusů</p>
+        </div>
       </div>
+      <div class="monthly-stats" id="currentMonthStats" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="monthly-stat best">
+          <div class="monthly-stat-label">📦 CELKEM KS</div>
+          <div class="monthly-stat-value" id="cmTotal">—</div>
+          <div class="monthly-stat-sub" id="cmTotalChange">—</div>
+        </div>
+        <div class="monthly-stat">
+          <div class="monthly-stat-label">📅 DNES</div>
+          <div class="monthly-stat-value" id="cmToday">—</div>
+          <div class="monthly-stat-sub" id="cmTodaySub">—</div>
+        </div>
+        <div class="monthly-stat">
+          <div class="monthly-stat-label">🏆 REKORDNÍ DEN</div>
+          <div class="monthly-stat-value" id="cmBestDay">—</div>
+          <div class="monthly-stat-sub" id="cmBestDaySub">—</div>
+        </div>
+        <div class="monthly-stat">
+          <div class="monthly-stat-label">📊 PRŮMĚR / DEN</div>
+          <div class="monthly-stat-value" id="cmAvg">—</div>
+          <div class="monthly-stat-sub" id="cmAvgSub">—</div>
+        </div>
+      </div>
+      <div class="chart-canvas-wrap" style="height: 320px;" id="currentMonthChartWrap"><canvas id="currentMonthChart"></canvas></div>
     </div>
 
     <!-- Měsíční přehled prodejů -->
@@ -2593,57 +2622,6 @@ function renderCharts() {
   Object.values(charts).forEach(c => c && c.destroy());
   charts = {};
 
-  // Chart 1: Area
-  const byDate = {};
-  transactions.forEach(t => {
-    if (!byDate[t.date]) byDate[t.date] = { paid: 0, debt: 0 };
-    byDate[t.date][t.status] += t.amount;
-  });
-  const chartData = Object.entries(byDate).sort(([a], [b]) => a.localeCompare(b)).slice(-10);
-
-  if (chartData.length > 0) {
-    charts.c1 = new Chart($('chart1'), {
-      type: 'line',
-      data: {
-        labels: chartData.map(([d]) => d),
-        datasets: [
-          {
-            label: 'Zaplaceno',
-            data: chartData.map(([, v]) => v.paid),
-            borderColor: '#76b900',
-            backgroundColor: 'rgba(118,185,0,0.15)',
-            fill: true,
-            tension: 0.4,
-            borderWidth: 2,
-            pointRadius: 0,
-            pointHoverRadius: 4
-          },
-          {
-            label: 'Dluhy',
-            data: chartData.map(([, v]) => v.debt),
-            borderColor: '#f87171',
-            backgroundColor: 'rgba(248,113,113,0.15)',
-            fill: true,
-            tension: 0.4,
-            borderWidth: 2,
-            pointRadius: 0,
-            pointHoverRadius: 4
-          }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: '#a89889', font: { size: 11 } } } },
-        scales: {
-          x: { ticks: { color: tickColor, font: {size:10} }, grid: { color: gridColor } },
-          y: { ticks: { color: tickColor, font: {size:10} }, grid: { color: gridColor } }
-        }
-      }
-    });
-  } else {
-    $('chart1Wrap').innerHTML = '<div class="empty-chart">Žádná data k zobrazení</div>';
-  }
-
   // Chart 3: Top 5 names (each with unique color)
   const byName = {};
   transactions.forEach(t => { byName[t.name] = (byName[t.name] || 0) + t.amount; });
@@ -2684,61 +2662,9 @@ function renderCharts() {
   } else {
     $('chart3Wrap').innerHTML = '<div class="empty-chart">Žádná data k zobrazení</div>';
   }
-
-  // Chart 4: Inventory line - in vs out over time
-  const invByDate = {};
-  inventory.forEach(i => {
-    if (!invByDate[i.date]) invByDate[i.date] = { in: 0, out: 0 };
-    if (i.type === 'out') invByDate[i.date].out += i.quantity;
-    else invByDate[i.date].in += i.quantity;
-  });
-  const invData = Object.entries(invByDate).sort(([a], [b]) => a.localeCompare(b)).slice(-10);
-
-  if (invData.length > 0) {
-    if (!$('chart4Wrap').querySelector('canvas')) {
-      $('chart4Wrap').innerHTML = '<canvas id="chart4"></canvas>';
-    }
-    charts.c4 = new Chart($('chart4'), {
-      type: 'line',
-      data: {
-        labels: invData.map(([d]) => d),
-        datasets: [
-          {
-            label: 'Naskladněno',
-            data: invData.map(([, v]) => v.in),
-            borderColor: '#76b900',
-            backgroundColor: 'rgba(118,185,0,0.1)',
-            fill: true,
-            tension: 0.4,
-            borderWidth: 2,
-            pointBackgroundColor: '#76b900',
-            pointRadius: 3
-          },
-          {
-            label: 'Odepsáno',
-            data: invData.map(([, v]) => v.out),
-            borderColor: '#f87171',
-            backgroundColor: 'rgba(248,113,113,0.1)',
-            fill: true,
-            tension: 0.4,
-            borderWidth: 2,
-            pointBackgroundColor: '#f87171',
-            pointRadius: 3
-          }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: '#a89889', font: {size: 11} } } },
-        scales: {
-          x: { ticks: { color: tickColor, font:{size:10} }, grid: { color: gridColor } },
-          y: { ticks: { color: tickColor, font:{size:10} }, grid: { color: gridColor } }
-        }
-      }
-    });
-  } else {
-    $('chart4Wrap').innerHTML = '<div class="empty-chart">Žádná data k zobrazení</div>';
-  }
+  
+  // Render the current month daily chart
+  renderCurrentMonthChart();
   
   // Render the monthly overview chart
   renderMonthlyChart();
@@ -2746,6 +2672,15 @@ function renderCharts() {
 
 // =============== MONTHLY OVERVIEW CHART ===============
 let monthlyMetric = 'amount'; // 'amount', 'count', 'quantity'
+
+// Days excluded from monthly chart calculations (e.g. big imports that skew stats)
+const EXCLUDED_DATES = new Set([
+  '2026-05-13'  // Big CSV import day - skews monthly stats
+]);
+
+function isExcludedDate(dateStr) {
+  return EXCLUDED_DATES.has(dateStr);
+}
 
 const MONTH_NAMES_CZ = ['Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čer', 'Čvc', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'];
 
@@ -2756,7 +2691,10 @@ function renderMonthlyChart() {
   
   // Aggregate transactions by year-month
   // Only count PAID transactions (skutečné prodeje) + zaplacené bývalé dluhy
-  const paidTransactions = transactions.filter(t => t.status === 'paid');
+  // Exclude specified dates (e.g. big imports)
+  const paidTransactions = transactions.filter(t => 
+    t.status === 'paid' && !isExcludedDate(t.date)
+  );
   
   if (paidTransactions.length === 0) {
     $('monthlyChartWrap').innerHTML = '<div class="empty-chart">Zatím žádné prodeje</div>';
@@ -2978,6 +2916,239 @@ document.querySelectorAll('.monthly-toggle').forEach(btn => {
     renderMonthlyChart();
   });
 });
+
+// =============== CURRENT MONTH DAILY CHART ===============
+const MONTHS_FULL_CZ = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 
+                        'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+
+function getDaysInMonth(year, month) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function renderCurrentMonthChart() {
+  const tickColor = '#555';
+  const gridColor = 'rgba(255,255,255,0.05)';
+  const tooltipBg = '#050505';
+  
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  const todayDay = now.getDate();
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+  
+  // Previous month
+  let prevMonth = currentMonth - 1;
+  let prevYear = currentYear;
+  if (prevMonth < 0) { prevMonth = 11; prevYear--; }
+  const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
+  
+  // Update label
+  $('currentMonthLabel').textContent = `(${MONTHS_FULL_CZ[currentMonth]} ${currentYear})`;
+  $('currentMonthSub').textContent = `Denní prodej kusů — porovnání s ${MONTHS_FULL_CZ[prevMonth].toLowerCase()}em`;
+  
+  // Filter PAID transactions for current and previous month
+  // Only paid transactions count as actual sales
+  // Exclude specified dates (e.g. big imports)
+  const paidTransactions = transactions.filter(t => 
+    t.status === 'paid' && t.quantity > 0 && !isExcludedDate(t.date)
+  );
+  
+  // Aggregate by day for current month
+  const currentMonthData = new Array(daysInMonth).fill(0);
+  const prevMonthData = new Array(daysInPrevMonth).fill(0);
+  
+  paidTransactions.forEach(t => {
+    if (!t.date) return;
+    const d = new Date(t.date);
+    if (isNaN(d.getTime())) return;
+    const qty = t.quantity || 0;
+    
+    if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
+      currentMonthData[d.getDate() - 1] += qty;
+    } else if (d.getFullYear() === prevYear && d.getMonth() === prevMonth) {
+      prevMonthData[d.getDate() - 1] += qty;
+    }
+  });
+  
+  // Build labels (1, 2, 3, ... up to daysInMonth)
+  const labels = Array.from({ length: daysInMonth }, (_, i) => `${i + 1}.`);
+  
+  // For previous month data, take only same number of days as current month
+  // (or pad with nulls if prev month is shorter)
+  const prevMonthDataForChart = [];
+  for (let i = 0; i < daysInMonth; i++) {
+    prevMonthDataForChart.push(i < daysInPrevMonth ? prevMonthData[i] : null);
+  }
+  
+  // Total for current month (up to today)
+  const currentTotal = currentMonthData.slice(0, todayDay).reduce((s, v) => s + v, 0);
+  // Total for previous month at same point (up to same day)
+  const prevAtSamePoint = prevMonthData.slice(0, Math.min(todayDay, daysInPrevMonth)).reduce((s, v) => s + v, 0);
+  // Total for whole previous month
+  const prevTotalFull = prevMonthData.reduce((s, v) => s + v, 0);
+  
+  // Today's value
+  const todayValue = currentMonthData[todayDay - 1] || 0;
+  
+  // Best day
+  let bestIdx = 0;
+  for (let i = 1; i < currentMonthData.length; i++) {
+    if (currentMonthData[i] > currentMonthData[bestIdx]) bestIdx = i;
+  }
+  const bestValue = currentMonthData[bestIdx];
+  
+  // Average per day (active days only - up to today, only days with data)
+  const activeDays = currentMonthData.slice(0, todayDay).filter(v => v > 0).length || 1;
+  const avgValue = currentTotal / activeDays;
+  
+  // Calculate change vs prev month at same point
+  let changeStr = '—';
+  if (prevAtSamePoint > 0) {
+    const pct = ((currentTotal - prevAtSamePoint) / prevAtSamePoint) * 100;
+    const arrow = pct >= 0 ? '↑' : '↓';
+    const color = pct >= 0 ? '#76b900' : '#f87171';
+    changeStr = `<span style="color:${color}; font-weight:600;">${pct >= 0 ? '+' : ''}${pct.toFixed(0)}% ${arrow}</span>`;
+  } else if (currentTotal > 0) {
+    changeStr = `<span style="color:#76b900; font-weight:600;">NOVÉ</span>`;
+  } else if (prevAtSamePoint === 0 && currentTotal === 0) {
+    changeStr = '—';
+  }
+  
+  // Update stats
+  $('cmTotal').textContent = `${fmt(currentTotal)} ks`;
+  $('cmTotalChange').innerHTML = `vs minulý měsíc: ${changeStr}`;
+  
+  $('cmToday').textContent = `${fmt(todayValue)} ks`;
+  $('cmTodaySub').textContent = `${todayDay}. ${MONTHS_FULL_CZ[currentMonth].toLowerCase()}`;
+  
+  if (bestValue > 0) {
+    $('cmBestDay').textContent = `${fmt(bestValue)} ks`;
+    $('cmBestDaySub').textContent = `${bestIdx + 1}. ${MONTHS_FULL_CZ[currentMonth].toLowerCase()}`;
+  } else {
+    $('cmBestDay').textContent = '—';
+    $('cmBestDaySub').textContent = '—';
+  }
+  
+  $('cmAvg').textContent = `${fmt(Math.round(avgValue))} ks`;
+  $('cmAvgSub').textContent = `z ${activeDays} ${activeDays === 1 ? 'aktivního dne' : (activeDays < 5 ? 'aktivních dnů' : 'aktivních dnů')}`;
+  
+  // Destroy old chart
+  if (charts.currentMonth) {
+    charts.currentMonth.destroy();
+    charts.currentMonth = null;
+  }
+  
+  // Recreate canvas if needed
+  let canvas = $('currentMonthChart');
+  if (!canvas) {
+    $('currentMonthChartWrap').innerHTML = '<canvas id="currentMonthChart"></canvas>';
+    canvas = $('currentMonthChart');
+  }
+  
+  // Mask data after today (don't show future days)
+  const currentMonthDataMasked = currentMonthData.map((v, i) => 
+    (i < todayDay) ? v : null
+  );
+  
+  // Datasets
+  const datasets = [
+    {
+      label: `${MONTHS_FULL_CZ[currentMonth]} ${currentYear}`,
+      data: currentMonthDataMasked,
+      borderColor: '#76b900',
+      backgroundColor: 'rgba(118, 185, 0, 0.15)',
+      borderWidth: 2.5,
+      tension: 0.3,
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      pointBackgroundColor: '#76b900',
+      pointBorderColor: '#0a0a0a',
+      pointBorderWidth: 2,
+      fill: true,
+      spanGaps: false
+    },
+    {
+      label: `${MONTHS_FULL_CZ[prevMonth]} ${prevYear}`,
+      data: prevMonthDataForChart,
+      borderColor: 'rgba(107, 114, 128, 0.6)',
+      backgroundColor: 'rgba(107, 114, 128, 0.05)',
+      borderWidth: 1.5,
+      borderDash: [5, 4],
+      tension: 0.3,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      fill: false,
+      spanGaps: false
+    }
+  ];
+  
+  charts.currentMonth = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: '#a89889',
+            font: { size: 11, family: 'Poppins' },
+            usePointStyle: true,
+            pointStyle: 'rect',
+            padding: 12,
+            boxWidth: 12,
+            boxHeight: 12
+          }
+        },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          borderColor: 'rgba(118,185,0,0.3)',
+          borderWidth: 1,
+          titleColor: '#76b900',
+          bodyColor: '#f5f1e8',
+          padding: 12,
+          callbacks: {
+            title: (ctx) => `${ctx[0].label} ${MONTHS_FULL_CZ[currentMonth].toLowerCase()}`,
+            label: (ctx) => {
+              const v = ctx.parsed.y;
+              if (v === null) return null;
+              return `${ctx.dataset.label}: ${fmt(v)} ks`;
+            }
+          }
+        },
+        // Today line annotation
+        annotation: {
+          annotations: {}
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor, drawBorder: false },
+          ticks: { 
+            color: tickColor, 
+            font: { size: 10, family: 'Poppins' },
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 15
+          }
+        },
+        y: {
+          grid: { color: gridColor, drawBorder: false },
+          ticks: { 
+            color: tickColor, 
+            font: { size: 11, family: 'Poppins' },
+            callback: (v) => fmt(Math.round(v))
+          },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
 
 // =============== FILTERS & SEARCH ===============
 function filterTransactions(items) {
