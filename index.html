@@ -2689,14 +2689,14 @@ function renderMonthlyChart() {
   const gridColor = 'rgba(255,255,255,0.05)';
   const tooltipBg = '#050505';
   
-  // Aggregate transactions by year-month
-  // Only count PAID transactions (skutečné prodeje) + zaplacené bývalé dluhy
+  // Aggregate ALL transactions by year-month (paid + debt)
+  // Both count as sales - debt is just unpaid yet
   // Exclude specified dates (e.g. big imports)
-  const paidTransactions = transactions.filter(t => 
-    t.status === 'paid' && !isExcludedDate(t.date)
+  const allTransactions = transactions.filter(t => 
+    !isExcludedDate(t.date)
   );
   
-  if (paidTransactions.length === 0) {
+  if (allTransactions.length === 0) {
     $('monthlyChartWrap').innerHTML = '<div class="empty-chart">Zatím žádné prodeje</div>';
     $('monthlyBest').textContent = '—';
     $('monthlyBestSub').textContent = '—';
@@ -2708,7 +2708,7 @@ function renderMonthlyChart() {
   }
   
   const byMonth = {};
-  paidTransactions.forEach(t => {
+  allTransactions.forEach(t => {
     if (!t.date) return;
     const d = new Date(t.date);
     if (isNaN(d.getTime())) return;
