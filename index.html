@@ -402,9 +402,14 @@
   }
 
   /* Modern glass header */
-  header {
+  /* Sticky top wrapper (header + nav together) */
+  .sticky-top {
     position: sticky;
     top: 0;
+    z-index: 50;
+  }
+  header {
+    position: relative;
     z-index: 50;
     background: linear-gradient(180deg, rgba(8,12,8,0.85) 0%, rgba(5,5,5,0.7) 100%);
     backdrop-filter: blur(28px) saturate(160%);
@@ -650,11 +655,11 @@
   /* Nav */
   nav {
     position: relative;
-    z-index: 10;
+    z-index: 40;
     border-bottom: 1px solid rgba(255,255,255,0.05);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    background: rgba(5,5,5,0.5);
+    background: rgba(5,5,5,0.85);
   }
   .nav-inner {
     max-width: 1280px;
@@ -1736,6 +1741,7 @@
 <div class="orb orb-2"></div>
 <div class="orb orb-3"></div>
 
+<div class="sticky-top">
 <header>
   <div class="header-inner">
     <div class="header-left">
@@ -1818,6 +1824,7 @@
     </button>
   </div>
 </nav>
+</div>
 
 <main>
   <!-- DASHBOARD -->
