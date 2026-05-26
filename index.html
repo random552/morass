@@ -402,11 +402,17 @@
   }
 
   /* Modern glass header */
-  /* Sticky top wrapper (header + nav together) */
+  /* Fixed top wrapper (header + nav together) - fixed works regardless of parent overflow */
   .sticky-top {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
+  }
+  /* Spacer to push content below the fixed header */
+  .top-spacer {
+    height: 0;
   }
   header {
     position: relative;
@@ -1825,6 +1831,7 @@
   </div>
 </nav>
 </div>
+<div class="top-spacer" id="topSpacer"></div>
 
 <main>
   <!-- DASHBOARD -->
@@ -2295,7 +2302,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (tab === 'dashboard') renderCharts();
   });
 });
-$('menuBtn').addEventListener('click', () => $('navInner').classList.toggle('collapsed'));
+$('menuBtn').addEventListener('click', () => {
+  $('navInner').classList.toggle('collapsed');
+  setTimeout(updateTopSpacer, 50);
+});
 
 // =============== STATUS BUTTONS ===============
 $('statusPaid').addEventListener('click', () => {
@@ -4731,6 +4741,23 @@ if (signOutBtn) signOutBtn.addEventListener('click', () => {
   signOutUser();
 });
 
+// =============== FIXED HEADER SPACER ===============
+// Set spacer height to match the fixed header+nav, so content isn't hidden behind it
+function updateTopSpacer() {
+  const stickyTop = document.querySelector('.sticky-top');
+  const spacer = $('topSpacer');
+  if (stickyTop && spacer) {
+    const h = stickyTop.offsetHeight;
+    spacer.style.height = h + 'px';
+  }
+}
+window.addEventListener('load', updateTopSpacer);
+window.addEventListener('resize', updateTopSpacer);
+// Update after a short delay (fonts/layout may shift)
+setTimeout(updateTopSpacer, 100);
+setTimeout(updateTopSpacer, 500);
+setTimeout(updateTopSpacer, 1000);
+
 // =============== SERVICE WORKER (PWA) ===============
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -4755,7 +4782,14 @@ window.addEventListener('appinstalled', () => {
 
 // =============== INIT ===============
 $('year').textContent = new Date().getFullYear();
+
+// Collapse mobile nav on startup
+if (window.innerWidth < 768) {
+  $('navInner').classList.add('collapsed');
+}
+
 render();
+updateTopSpacer();
 
 // Re-render charts on resize
 let resizeTimer;
