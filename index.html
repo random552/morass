@@ -336,6 +336,113 @@
   }
   .login-error.show { display: block; }
 
+  /* === FLOATING NAV BUTTON (FAB) === */
+  .fab-nav {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #76b900 0%, #5a8f00 100%);
+    border: 2px solid rgba(196, 245, 80, 0.4);
+    color: #0a0a0a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 20px rgba(118, 185, 0, 0.4);
+    z-index: 9999;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: inherit;
+  }
+  .fab-nav:hover {
+    transform: scale(1.08) rotate(90deg);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.7), 0 0 30px rgba(118, 185, 0, 0.6);
+  }
+  .fab-nav:active { transform: scale(0.95); }
+  .fab-nav svg { width: 24px; height: 24px; }
+  .fab-nav.open {
+    transform: rotate(45deg);
+    background: #f87171;
+    border-color: rgba(252, 165, 165, 0.6);
+    color: #fff;
+  }
+
+  /* FAB radial menu items */
+  .fab-menu {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fab-menu.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .fab-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px 10px 14px;
+    background: rgba(10,14,10,0.96);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(118,185,0,0.3);
+    border-radius: 28px;
+    color: #f5f1e8;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    transition: all 0.2s;
+    text-align: left;
+    min-width: 160px;
+  }
+  .fab-menu-item:hover {
+    background: rgba(118,185,0,0.15);
+    border-color: rgba(118,185,0,0.6);
+    color: #c4f550;
+    transform: translateX(-4px);
+  }
+  .fab-menu-item.active {
+    background: rgba(118,185,0,0.2);
+    border-color: #76b900;
+    color: #c4f550;
+  }
+  .fab-menu-item svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+  /* Backdrop overlay when FAB open */
+  .fab-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 9997;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .fab-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   /* === SYNC STATUS INDICATOR === */
   .sync-status {
     display: flex;
@@ -1833,6 +1940,34 @@
 </div>
 <div class="top-spacer" id="topSpacer"></div>
 
+<!-- FLOATING NAVIGATION BUTTON (FAB) - vždy viditelný, pro rychlé přepínání sekcí -->
+<div class="fab-backdrop" id="fabBackdrop"></div>
+<div class="fab-menu" id="fabMenu">
+  <button class="fab-menu-item" data-fab-tab="dashboard">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 4 4 5-5"/></svg>
+    Přehled
+  </button>
+  <button class="fab-menu-item" data-fab-tab="transactions">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 6h18M3 14h18M3 18h18"/></svg>
+    Transakce
+  </button>
+  <button class="fab-menu-item" data-fab-tab="stock">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+    Sklad
+  </button>
+  <button class="fab-menu-item" data-fab-tab="debts">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    Dluhy
+  </button>
+  <button class="fab-menu-item" data-fab-tab="history">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    Historie
+  </button>
+</div>
+<button class="fab-nav" id="fabNav" aria-label="Rychlá navigace">
+  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+</button>
+
 <main>
   <!-- DASHBOARD -->
   <section class="tab-section active stagger" id="tab-dashboard">
@@ -1942,6 +2077,43 @@
         </div>
       </div>
       <div class="chart-canvas-wrap" style="height: 320px;" id="monthlyChartWrap"><canvas id="monthlyChart"></canvas></div>
+    </div>
+
+    <!-- Kontinuální graf prodaných kusů od začátku -->
+    <div class="card" style="margin-top: 16px;">
+      <div class="monthly-header">
+        <div>
+          <h3 class="chart-title" style="margin: 0 0 4px 0;">Celkový vývoj prodejů <span style="color:#76b900;">(od začátku)</span></h3>
+          <p style="font-size: 12px; color: #6b7280; margin: 0;" id="cumulativeSub">Kumulativní součet prodaných kusů v čase</p>
+        </div>
+        <div class="monthly-toggles" id="cumulativeToggles">
+          <button class="monthly-toggle active" data-cum-view="cumulative">KUMULATIVNĚ</button>
+          <button class="monthly-toggle" data-cum-view="daily">DENNĚ</button>
+        </div>
+      </div>
+      <div class="monthly-stats" id="cumulativeStats" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="monthly-stat best">
+          <div class="monthly-stat-label">📦 CELKEM PRODÁNO</div>
+          <div class="monthly-stat-value" id="cumTotal">—</div>
+          <div class="monthly-stat-sub" id="cumTotalSub">—</div>
+        </div>
+        <div class="monthly-stat">
+          <div class="monthly-stat-label">📅 PRVNÍ PRODEJ</div>
+          <div class="monthly-stat-value" id="cumFirst">—</div>
+          <div class="monthly-stat-sub" id="cumFirstSub">—</div>
+        </div>
+        <div class="monthly-stat">
+          <div class="monthly-stat-label">⏱ AKTIVNÍCH DNŮ</div>
+          <div class="monthly-stat-value" id="cumActiveDays">—</div>
+          <div class="monthly-stat-sub" id="cumActiveDaysSub">—</div>
+        </div>
+        <div class="monthly-stat">
+          <div class="monthly-stat-label">📈 PRŮMĚR/DEN</div>
+          <div class="monthly-stat-value" id="cumAvg">—</div>
+          <div class="monthly-stat-sub" id="cumAvgSub">—</div>
+        </div>
+      </div>
+      <div class="chart-canvas-wrap" style="height: 340px;" id="cumulativeChartWrap"><canvas id="cumulativeChart"></canvas></div>
     </div>
 
     <!-- Všichni plátci -->
@@ -2305,6 +2477,54 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 $('menuBtn').addEventListener('click', () => {
   $('navInner').classList.toggle('collapsed');
   setTimeout(updateTopSpacer, 50);
+});
+
+// =============== FLOATING NAV BUTTON (FAB) ===============
+function closeFab() {
+  $('fabNav').classList.remove('open');
+  $('fabMenu').classList.remove('open');
+  $('fabBackdrop').classList.remove('open');
+}
+function toggleFab() {
+  const isOpen = $('fabNav').classList.contains('open');
+  if (isOpen) {
+    closeFab();
+  } else {
+    $('fabNav').classList.add('open');
+    $('fabMenu').classList.add('open');
+    $('fabBackdrop').classList.add('open');
+    document.querySelectorAll('.fab-menu-item').forEach(item => {
+      const tab = item.dataset.fabTab;
+      const section = $('tab-' + tab);
+      if (section && section.classList.contains('active')) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    });
+  }
+}
+$('fabNav').addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleFab();
+});
+$('fabBackdrop').addEventListener('click', closeFab);
+
+document.querySelectorAll('.fab-menu-item').forEach(item => {
+  item.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const tab = item.dataset.fabTab;
+    const navBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+    if (navBtn) navBtn.click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    closeFab();
+  });
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && $('fabNav').classList.contains('open')) {
+    closeFab();
+  }
 });
 
 // =============== STATUS BUTTONS ===============
@@ -2682,9 +2902,12 @@ function renderCharts() {
   
   // Render the current month daily chart
   renderCurrentMonthChart();
-  
+
   // Render the monthly overview chart
   renderMonthlyChart();
+
+  // Render the cumulative chart (from beginning)
+  renderCumulativeChart();
 }
 
 // =============== MONTHLY OVERVIEW CHART ===============
@@ -3166,6 +3389,187 @@ function renderCurrentMonthChart() {
     }
   });
 }
+
+// =============== CUMULATIVE CHART (from beginning) ===============
+let cumulativeView = 'cumulative';
+
+function renderCumulativeChart() {
+  const tickColor = '#555';
+  const gridColor = 'rgba(255,255,255,0.05)';
+  const tooltipBg = '#050505';
+
+  const allTx = transactions.filter(t =>
+    t.quantity > 0 && t.date && !isExcludedDate(t.date)
+  );
+
+  if (allTx.length === 0) {
+    $('cumulativeChartWrap').innerHTML = '<div class="empty-chart">Zatím žádné prodeje</div>';
+    $('cumTotal').textContent = '—';
+    $('cumTotalSub').textContent = '—';
+    $('cumFirst').textContent = '—';
+    $('cumFirstSub').textContent = '—';
+    $('cumActiveDays').textContent = '—';
+    $('cumActiveDaysSub').textContent = '—';
+    $('cumAvg').textContent = '—';
+    $('cumAvgSub').textContent = '—';
+    return;
+  }
+
+  const byDay = {};
+  allTx.forEach(t => {
+    if (!byDay[t.date]) byDay[t.date] = 0;
+    byDay[t.date] += (t.quantity || 0);
+  });
+
+  const sortedDays = Object.keys(byDay).sort();
+  const firstDay = sortedDays[0];
+  const lastDay = sortedDays[sortedDays.length - 1];
+
+  const allDays = [];
+  const dailyValues = [];
+  const cumulativeValues = [];
+  let runningTotal = 0;
+
+  const start = new Date(firstDay);
+  const end = new Date(lastDay);
+  const cur = new Date(start);
+  while (cur <= end) {
+    const yyyy = cur.getFullYear();
+    const mm = String(cur.getMonth() + 1).padStart(2, '0');
+    const dd = String(cur.getDate()).padStart(2, '0');
+    const key = `${yyyy}-${mm}-${dd}`;
+    allDays.push(key);
+    const dayVal = byDay[key] || 0;
+    dailyValues.push(dayVal);
+    runningTotal += dayVal;
+    cumulativeValues.push(runningTotal);
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  const totalDays = allDays.length;
+  const labels = allDays.map(d => {
+    const dt = new Date(d);
+    if (totalDays > 90) {
+      return `${dt.getDate()}.${dt.getMonth() + 1}.${String(dt.getFullYear()).slice(2)}`;
+    }
+    return `${dt.getDate()}.${dt.getMonth() + 1}.`;
+  });
+
+  const totalSum = runningTotal;
+  const activeDays = Object.keys(byDay).length;
+  const avgPerActiveDay = totalSum / Math.max(activeDays, 1);
+
+  const firstDate = new Date(firstDay);
+  const firstDateStr = `${firstDate.getDate()}.${firstDate.getMonth() + 1}.${firstDate.getFullYear()}`;
+  const daysSinceFirst = Math.floor((new Date() - firstDate) / (1000 * 60 * 60 * 24));
+
+  $('cumTotal').textContent = `${fmt(totalSum)} ks`;
+  $('cumTotalSub').textContent = `za ${totalDays} ${totalDays === 1 ? 'den' : (totalDays < 5 ? 'dny' : 'dnů')}`;
+
+  $('cumFirst').textContent = firstDateStr;
+  $('cumFirstSub').textContent = `před ${daysSinceFirst} ${daysSinceFirst === 1 ? 'dnem' : (daysSinceFirst < 5 ? 'dny' : 'dny')}`;
+
+  $('cumActiveDays').textContent = `${fmt(activeDays)}`;
+  $('cumActiveDaysSub').textContent = `z ${totalDays} celkem (${Math.round(activeDays/totalDays*100)}%)`;
+
+  $('cumAvg').textContent = `${fmt(Math.round(avgPerActiveDay))} ks`;
+  $('cumAvgSub').textContent = `v aktivních dnech`;
+
+  if (charts.cumulative) {
+    charts.cumulative.destroy();
+    charts.cumulative = null;
+  }
+
+  let canvas = $('cumulativeChart');
+  if (!canvas) {
+    $('cumulativeChartWrap').innerHTML = '<canvas id="cumulativeChart"></canvas>';
+    canvas = $('cumulativeChart');
+  }
+
+  const chartData = cumulativeView === 'cumulative' ? cumulativeValues : dailyValues;
+  const chartLabel = cumulativeView === 'cumulative' ? 'Kumulativní prodeje' : 'Denní prodeje';
+  const chartType = cumulativeView === 'cumulative' ? 'line' : 'bar';
+
+  $('cumulativeSub').textContent = cumulativeView === 'cumulative'
+    ? 'Kumulativní součet prodaných kusů v čase (vč. dluhů)'
+    : 'Denní prodané kusy v čase (vč. dluhů)';
+
+  const dataset = cumulativeView === 'cumulative' ? {
+    label: chartLabel,
+    data: chartData,
+    borderColor: '#76b900',
+    backgroundColor: 'rgba(118, 185, 0, 0.15)',
+    borderWidth: 2.5,
+    tension: 0.3,
+    pointRadius: 0,
+    pointHoverRadius: 5,
+    pointBackgroundColor: '#76b900',
+    pointBorderColor: '#0a0a0a',
+    pointBorderWidth: 2,
+    fill: true
+  } : {
+    label: chartLabel,
+    data: chartData,
+    backgroundColor: 'rgba(118, 185, 0, 0.6)',
+    borderColor: '#76b900',
+    borderWidth: 1,
+    borderRadius: 3
+  };
+
+  charts.cumulative = new Chart(canvas, {
+    type: chartType,
+    data: { labels, datasets: [dataset] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          borderColor: 'rgba(118,185,0,0.3)',
+          borderWidth: 1,
+          titleColor: '#76b900',
+          bodyColor: '#f5f1e8',
+          padding: 12,
+          callbacks: {
+            label: (ctx) => `${chartLabel}: ${fmt(ctx.parsed.y)} ks`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor, drawBorder: false },
+          ticks: {
+            color: tickColor,
+            font: { size: 10, family: 'Poppins' },
+            maxRotation: 45,
+            autoSkip: true,
+            maxTicksLimit: 20
+          }
+        },
+        y: {
+          grid: { color: gridColor, drawBorder: false },
+          ticks: {
+            color: tickColor,
+            font: { size: 11, family: 'Poppins' },
+            callback: (v) => fmt(Math.round(v))
+          },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+document.querySelectorAll('.monthly-toggle[data-cum-view]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.monthly-toggle[data-cum-view]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    cumulativeView = btn.dataset.cumView;
+    renderCumulativeChart();
+  });
+});
 
 // =============== FILTERS & SEARCH ===============
 function filterTransactions(items) {
