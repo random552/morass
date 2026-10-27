@@ -532,16 +532,14 @@
 
   /* Modern glass header */
   /* Fixed top wrapper (header + nav together) - fixed works regardless of parent overflow */
+  /* Header + nav wrapper (not sticky anymore - FAB handles navigation) */
   .sticky-top {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    position: relative;
     z-index: 50;
   }
-  /* Spacer to push content below the fixed header */
+  /* Spacer not needed anymore since header scrolls with content */
   .top-spacer {
-    height: 0;
+    display: none;
   }
   header {
     position: relative;
@@ -1839,6 +1837,13 @@
     .charts { gap: 12px; }
     .section-title { font-size: 26px; }
     main { padding: 20px 12px; }
+    /* Transparent nav on mobile (FAB is primary navigation now) */
+    nav {
+      background: transparent;
+      border-bottom: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
     .row { padding: 10px; gap: 8px; }
     .row-amount { font-size: 14px; }
     .row-name-text { font-size: 14px; }
@@ -5181,22 +5186,11 @@ if (signOutBtn) signOutBtn.addEventListener('click', () => {
   signOutUser();
 });
 
-// =============== FIXED HEADER SPACER ===============
-// Set spacer height to match the fixed header+nav, so content isn't hidden behind it
+// =============== HEADER SPACER (no-op) ===============
+// Header is no longer fixed - FAB handles navigation
 function updateTopSpacer() {
-  const stickyTop = document.querySelector('.sticky-top');
-  const spacer = $('topSpacer');
-  if (stickyTop && spacer) {
-    const h = stickyTop.offsetHeight;
-    spacer.style.height = h + 'px';
-  }
+  // No-op: header scrolls with content, spacer is hidden
 }
-window.addEventListener('load', updateTopSpacer);
-window.addEventListener('resize', updateTopSpacer);
-// Update after a short delay (fonts/layout may shift)
-setTimeout(updateTopSpacer, 100);
-setTimeout(updateTopSpacer, 500);
-setTimeout(updateTopSpacer, 1000);
 
 // =============== SERVICE WORKER (PWA) ===============
 if ('serviceWorker' in navigator) {
