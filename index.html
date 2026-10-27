@@ -226,12 +226,17 @@
     margin-top: 4px;
     letter-spacing: 0.05em;
   }
+  @media (max-width: 900px) {
+    #cumulativeStats { grid-template-columns: repeat(3, 1fr) !important; }
+  }
   @media (max-width: 700px) {
     #currentMonthStats { grid-template-columns: repeat(2, 1fr) !important; }
+    #cumulativeStats { grid-template-columns: repeat(2, 1fr) !important; }
   }
   @media (max-width: 600px) {
     .monthly-stats { grid-template-columns: 1fr; gap: 8px; }
     #currentMonthStats { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+    #cumulativeStats { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
     .monthly-stat { padding: 10px 12px; }
     .monthly-stat-value { font-size: 18px; }
     .monthly-toggle { padding: 6px 10px; font-size: 10px; }
@@ -679,25 +684,27 @@
     gap: 10px;
   }
   .header-menu-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    background: rgba(118,185,0,0.05);
-    border: 1px solid rgba(118,185,0,0.15);
-    color: #76b900;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: rgba(118,185,0,0.5);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s;
     font-family: inherit;
+    padding: 0;
+    opacity: 0.7;
   }
   .header-menu-btn:hover {
-    background: rgba(118,185,0,0.12);
-    border-color: rgba(118,185,0,0.4);
-    color: #c4f550;
+    background: rgba(118,185,0,0.08);
+    color: #76b900;
+    opacity: 1;
   }
-  .header-menu-btn svg { width: 18px; height: 18px; }
+  .header-menu-btn svg { width: 14px; height: 14px; }
   .header-dropdown {
     position: absolute;
     top: calc(100% + 8px);
@@ -2091,7 +2098,7 @@
           <button class="monthly-toggle" data-cum-view="daily">DENNĚ</button>
         </div>
       </div>
-      <div class="monthly-stats" id="cumulativeStats" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="monthly-stats" id="cumulativeStats" style="grid-template-columns: repeat(5, 1fr);">
         <div class="monthly-stat best">
           <div class="monthly-stat-label">📦 CELKEM PRODÁNO</div>
           <div class="monthly-stat-value" id="cumTotal">—</div>
@@ -2108,9 +2115,14 @@
           <div class="monthly-stat-sub" id="cumActiveDaysSub">—</div>
         </div>
         <div class="monthly-stat">
-          <div class="monthly-stat-label">📈 PRŮMĚR/DEN</div>
+          <div class="monthly-stat-label">📈 PRŮMĚR / AKT. DEN</div>
           <div class="monthly-stat-value" id="cumAvg">—</div>
           <div class="monthly-stat-sub" id="cumAvgSub">—</div>
+        </div>
+        <div class="monthly-stat">
+          <div class="monthly-stat-label">📊 PRŮMĚR / DEN</div>
+          <div class="monthly-stat-value" id="cumAvgAll">—</div>
+          <div class="monthly-stat-sub" id="cumAvgAllSub">—</div>
         </div>
       </div>
       <div class="chart-canvas-wrap" style="height: 340px;" id="cumulativeChartWrap"><canvas id="cumulativeChart"></canvas></div>
@@ -3412,6 +3424,8 @@ function renderCumulativeChart() {
     $('cumActiveDaysSub').textContent = '—';
     $('cumAvg').textContent = '—';
     $('cumAvgSub').textContent = '—';
+    $('cumAvgAll').textContent = '—';
+    $('cumAvgAllSub').textContent = '—';
     return;
   }
 
@@ -3458,6 +3472,7 @@ function renderCumulativeChart() {
   const totalSum = runningTotal;
   const activeDays = Object.keys(byDay).length;
   const avgPerActiveDay = totalSum / Math.max(activeDays, 1);
+  const avgPerAllDays = totalSum / Math.max(totalDays, 1);
 
   const firstDate = new Date(firstDay);
   const firstDateStr = `${firstDate.getDate()}.${firstDate.getMonth() + 1}.${firstDate.getFullYear()}`;
@@ -3473,7 +3488,12 @@ function renderCumulativeChart() {
   $('cumActiveDaysSub').textContent = `z ${totalDays} celkem (${Math.round(activeDays/totalDays*100)}%)`;
 
   $('cumAvg').textContent = `${fmt(Math.round(avgPerActiveDay))} ks`;
-  $('cumAvgSub').textContent = `v aktivních dnech`;
+  $('cumAvgSub').textContent = `jen dny s prodejem`;
+
+  // Avg per ALL days (including days without any sales) - 1 decimal
+  const avgAllRounded = Math.round(avgPerAllDays * 10) / 10;
+  $('cumAvgAll').textContent = `${avgAllRounded.toLocaleString('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ks`;
+  $('cumAvgAllSub').textContent = `vč. prázdných dnů`;
 
   if (charts.cumulative) {
     charts.cumulative.destroy();
