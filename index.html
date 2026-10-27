@@ -532,22 +532,31 @@
 
   /* Modern glass header */
   /* Fixed top wrapper (header + nav together) - fixed works regardless of parent overflow */
-  /* Header + nav wrapper (not sticky anymore - FAB handles navigation) */
+  /* Sticky-top wrapper - just a passthrough container now */
   .sticky-top {
     position: relative;
     z-index: 50;
   }
-  /* Spacer not needed anymore since header scrolls with content */
+  /* Spacer to push content down below the fixed header */
   .top-spacer {
-    display: none;
+    display: block;
+    height: 0;
   }
+  /* Fixed header (always visible at top) */
   header {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
-    background: linear-gradient(180deg, rgba(8,12,8,0.85) 0%, rgba(5,5,5,0.7) 100%);
+    background: linear-gradient(180deg, rgba(8,12,8,0.92) 0%, rgba(5,5,5,0.85) 100%);
     backdrop-filter: blur(28px) saturate(160%);
     -webkit-backdrop-filter: blur(28px) saturate(160%);
     border-bottom: 1px solid rgba(118,185,0,0.12);
+  }
+  /* Nav sits in normal flow (scrolls with content) */
+  .sticky-top > nav {
+    position: relative;
   }
   header::after {
     content: '';
@@ -1935,6 +1944,7 @@
     </div>
   </div>
 </header>
+<div class="top-spacer" id="topSpacer"></div>
 
 <nav>
   <div style="max-width: 1280px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; justify-content: space-between;">
@@ -1966,7 +1976,6 @@
   </div>
 </nav>
 </div>
-<div class="top-spacer" id="topSpacer"></div>
 
 <!-- FLOATING NAVIGATION BUTTON (FAB) - vždy viditelný, pro rychlé přepínání sekcí -->
 <div class="fab-backdrop" id="fabBackdrop"></div>
@@ -5186,11 +5195,21 @@ if (signOutBtn) signOutBtn.addEventListener('click', () => {
   signOutUser();
 });
 
-// =============== HEADER SPACER (no-op) ===============
-// Header is no longer fixed - FAB handles navigation
+// =============== HEADER SPACER ===============
+// Header is fixed - spacer pushes content down so it isn't hidden behind header
 function updateTopSpacer() {
-  // No-op: header scrolls with content, spacer is hidden
+  const header = document.querySelector('header');
+  const spacer = $('topSpacer');
+  if (header && spacer) {
+    const h = header.offsetHeight;
+    spacer.style.height = h + 'px';
+  }
 }
+window.addEventListener('load', updateTopSpacer);
+window.addEventListener('resize', updateTopSpacer);
+setTimeout(updateTopSpacer, 100);
+setTimeout(updateTopSpacer, 500);
+setTimeout(updateTopSpacer, 1000);
 
 // =============== SERVICE WORKER (PWA) ===============
 if ('serviceWorker' in navigator) {
