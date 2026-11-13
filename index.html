@@ -1354,7 +1354,7 @@ input:focus, textarea:focus, select:focus {
 @media (max-width: 768px) {
   .menu-btn { display: flex; }
   .charts { grid-template-columns: 1fr; }
-  .stats { grid-template-columns: repeat(2, 1fr); }
+  .stats { grid-template-columns: repeat(3, 1fr); }
   .stock-summary { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 700px) {
@@ -1365,7 +1365,7 @@ input:focus, textarea:focus, select:focus {
 @media (max-width: 600px) {
   main { padding: 12px 12px calc(100px + env(safe-area-inset-bottom, 0px)); }
   .header-inner { padding: 0 12px; }
-  .stats { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .stock-summary { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr; }
   .form-grid-3 { grid-template-columns: 1fr; }
@@ -1379,6 +1379,12 @@ input:focus, textarea:focus, select:focus {
 @media (max-width: 480px) {
   .brand-text { font-size: 18px; }
   .header-info .header-info-box:first-child { display: none; }
+  .stat-card { padding: 10px 8px; }
+  .stat-value { font-size: 18px; }
+  .stat-label { font-size: 10px; gap: 3px; }
+  .stat-label svg { width: 11px; height: 11px; }
+  .stat-meta { font-size: 10px; }
+  .unit { font-size: 11px !important; }
 }
 
 /* ===== Z-INDEX FIX — only main needs lifting above canvas ===== */
