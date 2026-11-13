@@ -1822,6 +1822,25 @@ input:focus, textarea:focus, select:focus {
   background-clip: text;
 }
 
+/* ===== MOBILE PERFORMANCE — disable expensive effects on touch devices ===== */
+@media (max-width: 768px) {
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .card, header, nav, .modal, .header-dropdown,
+  .fab-menu-item, .monthly-stat, .stock-card, .debt-card,
+  .login-card, .login-info, .toast, .monthly-toggles,
+  .import-modal, .sync-status, .filter-btn {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+  }
+  header { background: var(--ground) !important; }
+  nav    { background: var(--ground) !important; }
+  .modal-overlay, .fab-backdrop { background: rgba(0,0,0,0.6) !important; }
+  body::before, body::after { animation: none !important; }
+  #bgCanvas { display: none !important; }
+}
 </style>
 </head>
 <body>
