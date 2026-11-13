@@ -3,7 +3,7 @@
  * Cachuje aplikaci pro offline použití
  */
 
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.2.0';
 const CACHE_NAME = `552-cache-${CACHE_VERSION}`;
 
 // Soubory, které chceme cachovat pro offline použití
@@ -18,6 +18,15 @@ const ASSETS_TO_CACHE = [
   './icons/icon-512.png',
   './icons/icon-1024.png',
   './icons/favicon.ico',
+  './js/state.js',
+  './js/effects.js',
+  './js/inventory.js',
+  './js/transactions.js',
+  './js/dashboard.js',
+  './js/debts.js',
+  './js/history.js',
+  './js/auth.js',
+  './js/app.js',
   // External CDN resources
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
   'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Russo+One&family=Orbitron:wght@600;700;800;900&display=swap'
